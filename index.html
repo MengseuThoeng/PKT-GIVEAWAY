@@ -13,23 +13,18 @@
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const apiUrl = 'http://35.240.155.182:8080';
-
-            const searchInput = document.getElementById("searchInput");
             const usersTable = document.getElementById("usersTable");
+            const searchInput = document.getElementById("searchInput");
+            let allUsers = [];
 
-            searchInput.addEventListener("input", () => {
-                const prefix = searchInput.value;
-                fetch(`${apiUrl}/users/prefix?prefix=${prefix}`)
-                    .then(response => response.json())
-                    .then(users => displayUsers(users))
-                    .catch(error => console.error('Error fetching users:', error));
-            });
-
+            // Load all users from the local file
             function loadAllUsers() {
-                fetch(`${apiUrl}/users/all`)
+                fetch('user.json')
                     .then(response => response.json())
-                    .then(users => displayUsers(users))
+                    .then(users => {
+                        allUsers = users;
+                        displayUsers(users);
+                    })
                     .catch(error => console.error('Error fetching users:', error));
             }
 
@@ -54,6 +49,16 @@
                     });
                 }
             }
+
+            function filterUsers() {
+                const prefix = searchInput.value.toLowerCase();
+                const filteredUsers = allUsers.filter(user =>
+                    user.username.toLowerCase().includes(prefix)
+                );
+                displayUsers(filteredUsers);
+            }
+
+            searchInput.addEventListener("input", filterUsers);
 
             // Load all users when the page loads
             loadAllUsers();
