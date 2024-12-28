@@ -1,96 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PKT GIVEAWAY</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="icon" href="pngkt.png">
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="pngkt.png" />
     <style>
-        .fixed-height {
-            max-height: 400px; /* Adjust this value as needed */
-            overflow-y: auto;
-        }
+      .fixed-height {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal.show {
+        display: flex;
+      }
+
+      .music-control {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 50;
+      }
+
+      .music-control button {
+        transition: all 0.3s ease;
+      }
+
+      .music-control button:hover {
+        transform: scale(1.1);
+      }
     </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const usersTable = document.getElementById("usersTable");
-            const searchInput = document.getElementById("searchInput");
-            let allUsers = [];
+  </head>
+  <body class="bg-pink-50">
+    <!-- Audio Element -->
+    <audio id="bgMusic" loop>
+      <source src="song.mp3" type="audio/mp3" />
+      Your browser does not support the audio element.
+    </audio>
 
-            // Load all users from the local file
-            function loadAllUsers() {
-                fetch('user.json')
-                    .then(response => response.json())
-                    .then(users => {
-                        allUsers = users;
-                        displayUsers(users);
-                    })
-                    .catch(error => console.error('Error fetching users:', error));
-            }
-
-            function displayUsers(users) {
-                usersTable.innerHTML = "";
-                if (users.length === 0) {
-                    usersTable.innerHTML = `
-                        <tr>
-                            <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No users found</td>
-                        </tr>
-                    `;
-                } else {
-                    users.forEach(user => {
-                        const row = document.createElement("tr");
-                        row.classList.add("bg-white", "border-b", "hover:bg-pink-100");
-                        row.innerHTML = `
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.id}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${user.username}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${user.name}</td>
-                        `;
-                        usersTable.appendChild(row);
-                    });
-                }
-            }
-
-            function filterUsers() {
-                const prefix = searchInput.value.toLowerCase();
-                const filteredUsers = allUsers.filter(user =>
-                    user.username.toLowerCase().includes(prefix)
-                );
-                displayUsers(filteredUsers);
-            }
-
-            searchInput.addEventListener("input", filterUsers);
-
-            // Load all users when the page loads
-            loadAllUsers();
-        });
-    </script>
-</head>
-<body class="bg-pink-50">
-    <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div class="w-full max-w-4xl p-5 bg-white shadow-md rounded-lg">
-            <img src="pngkt.png" alt="PKT Logo" class="mx-auto mb-5 w-60 h-auto">
-            <div class="mb-5">
-                <label for="searchInput" class="block text-sm font-medium text-pink-700">Search by Username</label>
-                <div class="flex mt-1">
-                    <input type="text" id="searchInput" class="flex-1 border-pink-500 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500 sm:text-sm p-3" placeholder="Enter username">
-                </div>
-            </div>
-            <div class="overflow-x-auto fixed-height">
-                <table class="min-w-full divide-y divide-pink-200">
-                    <thead class="bg-pink-100">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-pink-600 uppercase tracking-wider">ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-pink-600 uppercase tracking-wider">Username</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-pink-600 uppercase tracking-wider">Name</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTable" class="bg-white divide-y divide-pink-200">
-                        <!-- User rows will be added here dynamically -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <!-- Music Control Button -->
+    <div class="music-control">
+      <button
+        id="musicToggle"
+        class="bg-pink-500 hover:bg-pink-600 text-white rounded-full p-3 shadow-lg flex items-center justify-center"
+      >
+        <svg
+          id="playIcon"
+          class="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <svg
+          id="pauseIcon"
+          class="h-6 w-6 hidden"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </button>
     </div>
-</body>
+
+    <!-- Previous HTML content remains the same -->
+    <!-- ... modal and main content ... -->
+
+    <!-- Modal -->
+    <div id="userModal" class="modal items-center justify-center">
+      <div class="bg-white rounded-lg p-6 m-4 max-w-xl w-full">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">User Details</h3>
+          <button
+            onclick="closeModal()"
+            class="text-gray-500 hover:text-gray-700"
+          >
+            <svg
+              class="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <div id="modalContent" class="space-y-3">
+          <p>
+            <span class="font-semibold">ID:</span>
+            <span id="modalId" class="text-gray-600"></span>
+          </p>
+          <p>
+            <span class="font-semibold">Username:</span>
+            <span id="modalUsername" class="text-gray-600"></span>
+          </p>
+          <p>
+            <span class="font-semibold">Full Name:</span>
+            <span id="modalFullName" class="text-gray-600"></span>
+          </p>
+          <p>
+            <span class="font-semibold">Type:</span>
+            <span id="modalType" class="text-gray-600"></span>
+          </p>
+          <p>
+            <span class="font-semibold">TikTok Link:</span>
+            <a
+              id="modalTikTokLink"
+              href="#"
+              target="_blank"
+              class="text-pink-600 hover:text-pink-800 break-all"
+            ></a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div
+      class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8"
+    >
+      <div class="w-full max-w-7xl p-5 bg-white shadow-md rounded-lg">
+        <img src="pngkt.png" alt="PKT Logo" class="mx-auto mb-5 w-60 h-auto" />
+        <div class="mb-5">
+          <label
+            for="searchInput"
+            class="block text-sm font-medium text-pink-700"
+            >Search by Username</label
+          >
+          <div class="flex mt-1">
+            <input
+              type="text"
+              id="searchInput"
+              class="flex-1 border shadow-md rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500 sm:text-sm p-3"
+              placeholder="Enter username"
+            />
+          </div>
+        </div>
+        <div class="overflow-x-auto fixed-height">
+          <table class="min-w-full divide-y divide-pink-200">
+            <thead class="bg-pink-100">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-pink-600 uppercase tracking-wider"
+                >
+                  No.
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-pink-600 uppercase tracking-wider"
+                >
+                  Username
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-pink-600 uppercase tracking-wider"
+                >
+                  Name
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-pink-600 uppercase tracking-wider"
+                >
+                  Type
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-pink-600 uppercase tracking-wider"
+                >
+                  TikTok Link
+                </th>
+              </tr>
+            </thead>
+            <tbody id="usersTable" class="bg-white divide-y divide-pink-200">
+              <!-- User rows will be added here dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        let i = 1;
+        const usersTable = document.getElementById("usersTable");
+        const searchInput = document.getElementById("searchInput");
+        const modal = document.getElementById("userModal");
+        let allUsers = [];
+
+        // Add music control functionality
+        const bgMusic = document.getElementById("bgMusic");
+        const musicToggle = document.getElementById("musicToggle");
+        const playIcon = document.getElementById("playIcon");
+        const pauseIcon = document.getElementById("pauseIcon");
+        let isPlaying = false;
+        
+        
+        
+
+        musicToggle.addEventListener("click", () => {
+          if (isPlaying) {
+            bgMusic.pause();
+            playIcon.classList.remove("hidden");
+            pauseIcon.classList.add("hidden");
+          } else {
+            bgMusic.play();
+            playIcon.classList.add("hidden");
+            pauseIcon.classList.remove("hidden");
+          }
+          isPlaying = !isPlaying;
+        });
+
+        // Add volume control
+        bgMusic.volume = 0.5;
+    
+
+        function loadAllUsers() {
+          fetch("giveaway-pkt-cambodia.users.json")
+            .then((response) => response.json())
+            .then((users) => {
+              allUsers = users;
+              displayUsers(users);
+            })
+            .catch((error) => console.error("Error fetching users:", error));
+        }
+
+        function displayUsers(users) {
+          usersTable.innerHTML = "";
+          if (users.length === 0) {
+            usersTable.innerHTML = `
+              <tr>
+                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No users found</td>
+              </tr>
+            `;
+          } else {
+            users.forEach((user, index) => {
+              const row = document.createElement("tr");
+              row.classList.add(
+                "bg-white",
+                "border-b",
+                "hover:bg-pink-100",
+                "cursor-pointer"
+              );
+              row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${
+                  index + 1
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${
+                  user.username
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${
+                  user.fullName
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${
+                  user.type
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${
+                  user.tikTokLink
+                }</td>
+              `;
+              row.addEventListener("click", () => showModal(user));
+              usersTable.appendChild(row);
+            });
+          }
+        }
+
+        function showModal(user) {
+          document.getElementById("modalId").textContent = user._id.$oid;
+          document.getElementById("modalUsername").textContent = user.username;
+          document.getElementById("modalFullName").textContent = user.fullName;
+          document.getElementById("modalType").textContent = user.type;
+          const tikTokLink = document.getElementById("modalTikTokLink");
+          tikTokLink.href = user.tikTokLink;
+          tikTokLink.textContent = user.tikTokLink;
+          modal.classList.add("show");
+        }
+
+        window.closeModal = function () {
+          modal.classList.remove("show");
+        };
+
+        // Close modal when clicking outside
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) {
+            closeModal();
+          }
+        });
+
+        function filterUsers() {
+          const prefix = searchInput.value.toLowerCase();
+          const filteredUsers = allUsers.filter((user) =>
+            user.username.toLowerCase().includes(prefix)
+          );
+          displayUsers(filteredUsers);
+        }
+
+        searchInput.addEventListener("input", filterUsers);
+        loadAllUsers();
+      });
+    </script>
+  </body>
 </html>
