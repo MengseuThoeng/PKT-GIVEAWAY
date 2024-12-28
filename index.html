@@ -23,6 +23,7 @@
         width: 100%;
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
+        z-index: 50;
       }
 
       .modal.show {
@@ -43,9 +44,47 @@
       .music-control button:hover {
         transform: scale(1.1);
       }
+
+      /* Glassmorphism background for premium feel */
+      .glass {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .snowflake {
+        position: fixed;
+        top: -10px;
+        pointer-events: none;
+        color: white; /* Snowflake color */
+        opacity: 0.8;
+        animation: fall linear infinite, drift ease-in-out infinite;
+      }
+
+      @keyframes fall {
+        from {
+          transform: translateY(-10px);
+        }
+        to {
+          transform: translateY(100vh); /* Fall from top to bottom */
+        }
+      }
+
+      @keyframes drift {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(30px); /* Slight horizontal movement */
+        }
+      }
     </style>
   </head>
-  <body class="bg-pink-50">
+  <body
+    class="bg-gradient-to-r from-pink-100 via-pink-50 to-pink-100 min-h-screen"
+  >
     <!-- Audio Element -->
     <audio id="bgMusic" loop>
       <source src="song.mp3" type="audio/mp3" />
@@ -95,12 +134,9 @@
       </button>
     </div>
 
-    <!-- Previous HTML content remains the same -->
-    <!-- ... modal and main content ... -->
-
     <!-- Modal -->
     <div id="userModal" class="modal items-center justify-center">
-      <div class="bg-white rounded-lg p-6 m-4 max-w-xl w-full">
+      <div class="glass p-6 m-4 max-w-xl w-full">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold text-gray-900">User Details</h3>
           <button
@@ -153,10 +189,8 @@
     </div>
 
     <!-- Main Content -->
-    <div
-      class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8"
-    >
-      <div class="w-full max-w-7xl p-5 bg-white shadow-md rounded-lg">
+    <div class="flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+      <div class="w-full max-w-7xl p-5 glass">
         <img src="pngkt.png" alt="PKT Logo" class="mx-auto mb-5 w-60 h-auto" />
         <div class="mb-5">
           <label
@@ -231,9 +265,30 @@
         const playIcon = document.getElementById("playIcon");
         const pauseIcon = document.getElementById("pauseIcon");
         let isPlaying = false;
-        
-        
-        
+
+        const createSnowflake = () => {
+          const snowflake = document.createElement("div");
+          snowflake.textContent = "❄"; // Snowflake character
+          snowflake.classList.add("snowflake");
+
+          // Random positioning and animation properties
+          const size = Math.random() * 10 + 10; // Snowflake size (10px to 20px)
+          snowflake.style.left = Math.random() * 100 + "vw"; // Random horizontal position
+          snowflake.style.fontSize = size + "px"; // Apply random size
+          snowflake.style.animationDuration = Math.random() * 3 + 5 + "s"; // Fall speed (5s to 8s)
+          snowflake.style.animationDelay = Math.random() * 2 + "s"; // Staggered start
+
+          // Add to the DOM
+          document.body.appendChild(snowflake);
+
+          // Remove snowflake after animation
+          setTimeout(() => {
+            snowflake.remove();
+          }, 8000); // Matches the maximum animation duration
+        };
+
+        // Create a new snowflake every 100 milliseconds
+        setInterval(createSnowflake, 100);
 
         musicToggle.addEventListener("click", () => {
           if (isPlaying) {
@@ -250,7 +305,6 @@
 
         // Add volume control
         bgMusic.volume = 0.5;
-    
 
         function loadAllUsers() {
           fetch("giveaway-pkt-cambodia.users.json")
