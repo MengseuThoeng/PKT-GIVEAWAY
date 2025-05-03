@@ -214,10 +214,10 @@
             <span class="font-semibold text-pink-600 mr-2">Full Name:</span>
             <span id="modalFullName"></span>
           </p>
-          <p class="flex items-center">
+          <!-- <p class="flex items-center">
             <span class="font-semibold text-pink-600 mr-2">Type:</span>
             <span id="modalType"></span>
-          </p>
+          </p> -->
           <p class="flex items-center">
             <span class="font-semibold text-pink-600 mr-2">TikTok Link:</span>
             <a
@@ -401,7 +401,7 @@
           document.getElementById("modalId").textContent = user.id;
           document.getElementById("modalUsername").textContent = user.username;
           document.getElementById("modalFullName").textContent = user.fullName;
-          document.getElementById("modalType").textContent = user.type;
+          // document.getElementById("modalType").textContent = user.type;
           const tikTokLink = document.getElementById("modalTikTokLink");
           tikTokLink.href = user.tikTokLink;
           tikTokLink.textContent = user.tikTokLink;
